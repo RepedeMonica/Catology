@@ -41,13 +41,15 @@ def load_weights_from_text(file_name):
 
     return weights, biases
 
-openai.api_key = ""
+openai.api_key = "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"
 
 mappings_dict = {}
 for _, row in changes_df.iterrows():
     column = row["Column"]
     if column.lower() == "race":
         continue  # skip  'Race'
+    if column.lower() in ['sex','age','cats in the household','stays in','lives in']:
+        continue
     original_value = row["Original Value"].lower()
     new_value = row["New Value"]
     if column not in mappings_dict:
@@ -71,10 +73,7 @@ def extract_attributes_from_description(description):
         f"Attribute must be the same as in the mapping reference. The value extracted must be the same as in the mapping reference! "
         f"You must keep the word considerable and moderate not any other form (such as considerably or moderately)."
         f"The attributes can vary a bit like from calm, you can have calmness or from timid timidity and so on for the other attributes."
-        f"Even if the mapping values does not find exactly in the description, you should output the initial mapping values, not the values you found in the description."
-        f"Use only the exact terms from this predefined list for attribute values: -not-, -a bit-, -moderate-, -considerable-, -extremely-."
-        f"Do not extract or include any synonyms, variations, or alternate forms of these terms(for example:Use -considerable- instead  of -considerably-.Use -moderate- instead of -moderately-.)"
-    )
+        f"Even if the mapping values does not find exactly in the description, you should output the initial mapping values, not the values you found in the description.")
 
     try:
         response = openai.ChatCompletion.create(
@@ -150,8 +149,20 @@ def get_breed_from_text(out_from_gpt):
     return predicted_breed
 
 def read_and_identify():
-    description = ("This female cat is aged between 2 and 10 years. She lives in a rural area and shares her household with one other cat, making a total of 2 cats in the household.She stays in an apartment without a balcony and does not spend any time outdoors each day. She also does not spend any time with her owner.Her personality traits include being moderate in timidity, a bit calm, and moderate in fear. She is extremely intelligent, a bit vigilant, and extremely persevering. While she is only a bit loving and moderate in amicability, she experiences moderate loneliness. She is not brutal, not aggressive, and not impulsive.However, she is considerable in dominance and extremely predictable while being considerably distracted.Regarding her environment, she lives in a high natural area and never captures birds or small mammals."
+    description = ("This female cat is aged between 2 and 10 years. She lives in a rural area and shares her household with two other cats, making a total of 3 cats in the household.She stays in an apartment without a balcony and does not spend any time outdoors each day. She also does not spend any time with her owner.Her personality traits include being moderate in timidity, a bit calm, and moderate in fear. She is extremely intelligent, a bit vigilant, and extremely persevering. While she is only a bit loving and moderate in amicability, she experiences moderate loneliness. She is not brutal, not aggressive, and not impulsive.However, she is considerable in dominance and extremely predictable while being considerably distracted.Regarding her environment, she lives in a high natural area and never captures birds or small mammals."
 )
+    description =("This female cat, aged between 2 and 10 years, resides in a rural area within an apartment without a balcony. She does not spend any time outdoors each day and does not have interaction with her owner. Her temperament is characterized by considerable timidity, a slight level of calmness, and a moderate level of fear. Despite her reserved nature, she exhibits an extremely high level of intelligence and perseverance. In terms of social behavior, she is extremely loving but only a bit amicable, experiencing moderate loneliness and a slight sense of dominance. She is not aggressive, impulsive, or predictable, and only slightly vigilant and distracted. This cat has a high affinity for natural areas but never engages in capturing birds or small mammals.")
+
+    description = ("The cat is considerable calmness and perseverance, making it a good companion with a moderate level of vigilance. It is not afraid, aggressive, or lonely, and has a considerable level of amiability and predictability.")
+
+    description = ("The  cat is known for its considerable calmness and amiability towards its owner, making it a good companion. It shows a moderate level of vigilance and perseverance, while also displaying considerable predictability and impulsiveness. This breed tends to have a considerable dominance and a moderate brutal nature, although it is not aggressive. The  cat enjoys spending time outdoors in a moderate natural area but rarely captures birds and never captures small mammals.")
+
+    #description = ("On the other hand, the cat spends long hours outdoors but has limited interaction with its owner. It is a bit timid and calm, not afraid, and extremely intelligent. While it is only a bit vigilant, it is considerably persevering and loving. The cat is a bit amical, not lonely, and extremely brutal, but not dominant or aggressive. It is a bit impulsive and predictable, with considerable distractions. This cat has a high natural area and never captures birds, rarely capturing small mammals.")
+
+    description = ("The cat is considerable calm and perseverance. The cat is not aggressive and extremely amical")
+
+    description = ("The cat is not calm and not perseverance. The cat is extremely aggressive and not amical.")
+
 
     extracted_attributes = extract_attributes_from_description(description)
     predicted_race = get_breed_from_text(extracted_attributes)
@@ -161,5 +172,5 @@ def read_and_identify():
         file.write(str(extracted_attributes) + "\n")
     with open(predictions_file, 'a') as file:
         file.write(predicted_race + "\n")
-#read_and_identify()
+read_and_identify()
 
